@@ -59,7 +59,15 @@ class CubeView(APIView):
         return response
 
     def delete(self, request, user_id=None, cube_id=None):
-        cube = Cube.objects.filter(user_id=user_id, id=cube_id)
+        cube = CubeUser.objects.filter(user_id=user_id, cube_id=cube_id)
+        cube.delete()
+
+        cube = ContentCube.objects.filter(user_id=user_id, cube_id=cube_id)
+        cube.delete()
+
+        cube = Cube.objects.filter(user_id=user_id)
+        cube.delete()
+        cube = Cube.objects.filter(user_id=str(int(user_id)-1))
         cube.delete()
         response_msg = {'msg': 'delete succesfully'}
         response = HttpResponse(json.dumps(response_msg))
@@ -73,17 +81,29 @@ class ContentView(APIView):
     List all CONTENT OF GIVEN USER, or create a new content.
     """
     def get(self, request=None, user_id=None):
+        # import ipdb
+        # ipdb.set_trace()
         cube12 = Content.objects.filter(user_id=user_id)
-        shar_cube = ContentUser.objects.filter(user_id=user_id)
         lis=[]
-        for cu in shar_cube:
-            lis.append(cu.content_id.id)
+
         for cube1 in cube12:
             lis.append(cube1.id)
+        shar_cube = ContentUser.objects.filter(user_id=user_id)
+
+        for cu in shar_cube:
+            lis.append(cu.content_id.id)
+
 
         shar_cube2 = ContentCube.objects.filter(user_id=user_id)
         for cu1 in shar_cube2:
             lis.append(cu1.content_id.id)
+
+        cuser = CubeUser.objects.filter(user_id=user_id)
+
+        for cu1 in cuser:
+            obj=ContentCube.objects.filter(cube_id=cu1.cube_id)
+            for obj1 in obj:
+                lis.append(obj1.content_id.id)
         content = Content.objects.filter(id__in=lis)
         serializer = ContentSerializer(content, many=True)
         return HttpResponse(json.dumps(serializer.data))
@@ -107,9 +127,10 @@ class AddContentToCubeView(APIView):
 
 
     def post(self, request, user_id=None, cube_id=None):
-
-        request.DATA['user_id']=user_id
-        request.DATA['cube_id']=cube_id
+        # import ipdb
+        # ipdb.set_trace()
+        request.DATA['user_id'] = user_id
+        request.DATA['cube_id'] = cube_id
         serializer = ContentCubeSerializer(data=request.DATA)
         if serializer.is_valid():
             serializer.save()
@@ -120,7 +141,7 @@ class AddContentToCubeView(APIView):
         return response
 
     def delete(self, request, user_id=None, cube_id=None, content_id=None):
-        cube = ContentCube.objects.filter(user_id=user_id, cube_id=cube_id, content_id=content_id)
+        cube = ContentCube.objects.filter(cube_id=cube_id, content_id=content_id)
         cube.delete()
         response_msg = {'msg': 'delete succesfully'}
         response = HttpResponse(json.dumps(response_msg))

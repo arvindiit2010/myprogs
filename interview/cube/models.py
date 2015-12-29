@@ -52,7 +52,8 @@ class CubeUser(models.Model):
 
     # def __unicode__(self):
     #     return '%s: %s' % (self.link, self.user_id)
-
+    def __repr__(self):
+        return '%s: %s' % (self.user_id, self.cube_id)
     class Meta:
         verbose_name = 'share cube with user'
         db_table = 'cube_user'
@@ -78,8 +79,8 @@ class ContentCube(models.Model):
     cube_id = models.ForeignKey(Cube, db_column='cube_id', related_name='content_cube')
     content_id = models.ForeignKey(Content, db_column='content_id', related_name='content_cube')
 
-    # def __unicode__(self):
-    #     return '%s: %s' % (self.link, self.user_id)
+    def __repr__(self):
+        return '%s: %s' % (self.user_id, self.cube_id)
 
     class Meta:
         verbose_name = 'add content with cube'
